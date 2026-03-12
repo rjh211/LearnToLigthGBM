@@ -16,8 +16,8 @@ def findBestSplit(candidateList):
     bestGini = float('inf')
     bestCandidate = None
     for candidate in candidateList:
-        LeftList = [ answer[index] for index, value in enumerate(sourceList) if value <= candidate]
-        RightList = [ answer[index] for index, value in enumerate(sourceList) if value > candidate]
+        LeftList = [answer[index] for index, value in enumerate(sourceList) if value <= candidate]
+        RightList = [answer[index] for index, value in enumerate(sourceList) if value > candidate]
         giniValue = calGiniValue(LeftList, RightList)
 
         if giniValue < bestGini:
