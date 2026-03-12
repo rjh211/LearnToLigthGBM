@@ -1,4 +1,9 @@
 from Node import Node
 
-Node1 = Node([3, 7, 11, 17], [0, 0, 1, 1])
-Node1.printResult(9)
+Node1 = Node()
+
+RootNode = Node1.buildTree([3, 7, 11, 17], [1, 0, 1, 1])
+
+
+for i in range(11):
+    print('input value : '+ str(i) + ' result : ' + str(RootNode.printResult(i)))
