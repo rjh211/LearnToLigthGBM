@@ -2,7 +2,8 @@ from Node import Node
 
 Node1 = Node()
 
-RootNode = Node1.buildTree([3, 7, 11, 17], [1, 0, 1, 1])
+# RootNode = Node1.buildTree([[3], [7], [11], [17]], [1, 0, 1, 1])
+RootNode = Node1.buildTree([[3, 7], [11, 17], [2, 5], [54, 2]], [1, 0, 1, 1])
 
 
 for i in range(11):

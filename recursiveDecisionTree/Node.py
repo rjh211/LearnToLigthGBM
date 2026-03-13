@@ -1,25 +1,29 @@
 class Node:
-    sourceList = None
-    answer = None
-    candidateList = None
-    threshold = None
-    feature = None
-    leftChild = None
-    rightChild = None
 
     def __init__(self):
-        pass
+        self.sourceList = None
+        self.answer = None
+        self.candidateList = None
+        self.threshold = None
+        self.feature = None
+        self.leftChild = None
+        self.rightChild = None
 
     def setSourceList(self, sourceList):
-        self.sourceList = sourceList
+        self.sourceList = self.featureTransfose(sourceList)
         self.candidateList = self.getCandidateList()
+
+    def featureTransfose(self, sourceList):
+        return [list(col) for col in zip(*sourceList)]
     
     def setAnswer(self, answer):
         self.answer = answer
 
     def getCandidateList(self):
-        return [(a + b) / 2 for (a, b) in zip(self.sourceList, self.sourceList[1:])]
-        
+        return [self.calCandidate(lst) for lst in self.sourceList]
+
+    def calCandidate(self, source):
+        return [(a + b) / 2 for (a, b) in zip(source, source[1:])]
 
     def calGiniValue(self, leftList, rightList):
         leftSize = len(leftList)
@@ -27,19 +31,21 @@ class Node:
 
         leftGini = 1 - (sum([(leftList.count(i) / leftSize) ** 2 for i in set(leftList)]))
         rightGini = 1 - (sum([(rightList.count(i) / rightSize) ** 2 for i in set(rightList)]))
-        return (leftSize / len(self.sourceList)) * leftGini + (rightSize / len(self.sourceList)) * rightGini
+        return (leftSize / (leftSize + rightSize)) * leftGini + (rightSize / (leftSize + rightSize)) * rightGini
 
     def findBestSplit(self):
         bestGini = float('inf')
         self.threshold = None
-        for candidate in self.candidateList:
-            LeftList = [self.answer[index] for index, value in enumerate(self.sourceList) if value <= candidate]
-            RightList = [self.answer[index] for index, value in enumerate(self.sourceList) if value > candidate]
-            giniValue = self.calGiniValue(LeftList, RightList)
+        for index, candidateList in enumerate(self.candidateList):
+            for candidate in candidateList:
+                LeftList = [self.answer[i] for i, value in enumerate(self.sourceList[index]) if value <= candidate]
+                RightList = [self.answer[i] for i, value in enumerate(self.sourceList[index]) if value > candidate]
+                giniValue = self.calGiniValue(LeftList, RightList)
 
-            if giniValue < bestGini:
-                bestGini = giniValue
-                self.threshold = candidate
+                if giniValue < bestGini:
+                    self.feature = index
+                    bestGini = giniValue
+                    self.threshold = candidate
 
     def buildTree(self, sourceList, answer):
         node = Node()
@@ -47,13 +53,13 @@ class Node:
         node.setSourceList(sourceList)
         node.setAnswer(answer)
         
-        if node.calGiniValue(answer, []) == 0:
+        if len(set(node.answer)) == 1 or node.threshold is None or node.feature is None:
             return node
 
         node.findBestSplit()
 
-        node.leftChild = node.buildTree([value for value in sourceList if value <= node.threshold], [answer[index] for index, value in enumerate(sourceList) if value <= node.threshold])
-        node.rightChild = node.buildTree([value for value in sourceList if value > node.threshold], [answer[index] for index, value in enumerate(sourceList) if value > node.threshold])
+        node.leftChild = node.buildTree([sourceList[index] for index, value in enumerate(node.sourceList[node.feature]) if value <= node.threshold], [answer[index] for index, value in enumerate(node.sourceList[node.feature]) if value <= node.threshold])
+        node.rightChild = node.buildTree([sourceList[index] for index, value in enumerate(node.sourceList[node.feature]) if value > node.threshold], [answer[index] for index, value in enumerate(node.sourceList[node.feature]) if value > node.threshold])
 
         return node
 
@@ -61,7 +67,7 @@ class Node:
     def printResult(self, value):
         if self.leftChild is None and self.rightChild is None:
             return self.answer[0]
-        if value <= self.threshold:
+        if value[self.feature] <= self.threshold:
             return self.leftChild.printResult(value)
         else:
             return self.rightChild.printResult(value)
